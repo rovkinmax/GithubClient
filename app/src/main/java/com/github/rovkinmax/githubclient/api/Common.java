@@ -1,14 +1,15 @@
 package com.github.rovkinmax.githubclient.api;
 
-import android.support.annotation.NonNull;
-
 import com.github.rovkinmax.githubclient.BuildConfig;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.TimeUnit;
 
-import retrofit.RequestInterceptor;
+import io.realm.RealmObject;
 import retrofit.RestAdapter;
 import retrofit.android.AndroidLog;
 import retrofit.client.OkClient;
@@ -22,6 +23,19 @@ public final class Common {
     private static final int TIMEOUT = 60;
     private static final int WRITE_TIMEOUT = 120;
     private static final int CONNECT_TIMEOUT = 10;
+    public static final Gson GSON_REALM = new GsonBuilder()
+            .setExclusionStrategies(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes f) {
+                    return f.getDeclaringClass().equals(RealmObject.class);
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> clazz) {
+                    return false;
+                }
+            })
+            .create();
     private static final OkHttpClient CLIENT = new OkHttpClient();
 
     static {
@@ -38,26 +52,10 @@ public final class Common {
         return new RestAdapter.Builder()
                 .setLog(new AndroidLog(LOG_TAG))
                 .setLogLevel(RestAdapter.LogLevel.FULL)
-                .setConverter(new GsonConverter(new Gson()))
+                .setConverter(new GsonConverter(GSON_REALM))
                 .setClient(new OkClient(CLIENT))
-                .setRequestInterceptor(buildRequestInterceptor())
                 .setEndpoint(BuildConfig.SERVER_URL);
     }
 
 
-    @NonNull
-    private static RequestInterceptor buildRequestInterceptor() {
-        return new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                /*AuthData authData = AuthData.getInstance();
-                if (authData != null) {
-                    request.addHeader(
-                            AUTHORIZATION_HEADER_KEY,
-                            String.format(AUTHORIZATION_HEADER_VALUE_FORMAT, authData.getTokenType(), authData.getAuthToken())
-                    );
-                }*/
-            }
-        };
-    }
 }
