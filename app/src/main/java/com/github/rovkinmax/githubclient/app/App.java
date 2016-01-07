@@ -19,6 +19,7 @@ public class App extends Application {
                 .setPrefsName(getPackageName())
                 .setUseDefaultSharedPreference(true)
                 .build();
+
         AuthData.setup(this);
     }
 }

@@ -53,22 +53,23 @@ public class RepoListAdapter extends RecyclerView.Adapter<RepoListAdapter.RepoHo
         private TextView mNameView;
         private TextView mDescriptionView;
         private ImageView mIconView;
-        private TextView mUserNameView;
+        private TextView mLangView;
 
         public RepoHolder(View itemView) {
             super(itemView);
             mNameView = (TextView) itemView.findViewById(R.id.tv_name);
             mDescriptionView = (TextView) itemView.findViewById(R.id.tv_desc);
             mIconView = (ImageView) itemView.findViewById(R.id.iv_icon);
-            mUserNameView = (TextView) itemView.findViewById(R.id.tv_username);
+            mLangView = (TextView) itemView.findViewById(R.id.tv_language);
         }
 
         public void bind(Repo repo) {
             mNameView.setText(repo.getName());
             mDescriptionView.setText(repo.getDescription());
-            mUserNameView.setText(repo.getOwner().getUsername());
+            mLangView.setText(repo.getLanguage());
             Glide.with(itemView.getContext())
                     .load(repo.getOwner().getAvatar())
+                    .transform(new CircleTransform(itemView.getContext()))
                     .into(mIconView);
         }
     }
