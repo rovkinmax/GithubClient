@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,16 +15,18 @@ import android.widget.EditText;
 import com.github.rovkinmax.githubclient.R;
 import com.github.rovkinmax.githubclient.api.AuthApi;
 import com.github.rovkinmax.githubclient.model.api.Authorization;
-import com.github.rovkinmax.githubclient.rx.RxLoader;
 import com.github.rovkinmax.githubclient.util.AuthUtil;
+import com.github.rovkinmax.rxretain.EmptySubscriber;
+import com.github.rovkinmax.rxretain.RetainFactory;
+import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
 /**
  * @author Rovkin Max
@@ -37,6 +37,7 @@ public class LoginActivity extends MyAccountAuthenticatorActivity {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginContentView;
+    private Button mEmailSignInButton;
 
     public static void start(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
@@ -50,27 +51,22 @@ public class LoginActivity extends MyAccountAuthenticatorActivity {
         setContentView(R.layout.ac_login);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.et_login);
         mPasswordView = (EditText) findViewById(R.id.password);
-        RxTextView.editorActions(mPasswordView)
-                .subscribe(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer id) {
-                        if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                            attemptLogin();
-                        }
-                    }
-                });
-
-
-        final Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
-
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mLoginContentView = findViewById(R.id.login_content);
         mProgressView = findViewById(R.id.login_progress);
+
+        setupBindings();
+        showProgressIfLoading();
+        RxView.clicks(mEmailSignInButton)
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        attemptLogin();
+                    }
+                });
+    }
+
+    private void setupBindings() {
         Observable.combineLatest(buildEmailObservable(), buildPassObservable(), new Func2<Boolean, Boolean, Boolean>() {
             @Override
             public Boolean call(Boolean isValidEmail, Boolean isValidPass) {
@@ -80,6 +76,15 @@ public class LoginActivity extends MyAccountAuthenticatorActivity {
             @Override
             public void call(Boolean isValidCredentials) {
                 mEmailSignInButton.setEnabled(isValidCredentials);
+            }
+        });
+    }
+
+    private void showProgressIfLoading() {
+        RetainFactory.create(getFragmentManager(), createAuthObservable(), new EmptySubscriber<Authorization>() {
+            @Override
+            public void onStart() {
+                showProgress(true);
             }
         });
     }
@@ -106,28 +111,30 @@ public class LoginActivity extends MyAccountAuthenticatorActivity {
                 });
     }
 
+    private Observable<Authorization> createAuthObservable() {
+        return AuthApi.auth(this, mEmailView.getText().toString(), mPasswordView.getText().toString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 
     private void attemptLogin() {
-        AuthApi.auth(this, mEmailView.getText().toString(), mPasswordView.getText().toString())
-                .compose(RxLoader.<Authorization>buildLoaderTransformer(getApplicationContext(), getLoaderManager(), R.id.auth_loader))
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Action0() {
+        RetainFactory.restart(getFragmentManager(), createAuthObservable())
+                .subscribe(new EmptySubscriber<Authorization>() {
                     @Override
-                    public void call() {
+                    public void onStart() {
                         showProgress(true);
                     }
-                })
-                .subscribe(new Action1<Authorization>() {
+
                     @Override
-                    public void call(Authorization authorization) {
+                    public void onNext(Authorization authorization) {
                         showProgress(false);
                         saveAccount();
                         startMainActivity();
                     }
-                }, new Action1<Throwable>() {
+
                     @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
+                    public void onError(Throwable e) {
+                        super.onError(e);
                         showProgress(false);
                     }
                 });
