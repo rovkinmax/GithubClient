@@ -64,6 +64,7 @@ public class GHAccountAuthenticator extends AbstractAccountAuthenticator {
 
         // If we get an authToken - we return it
         if (!TextUtils.isEmpty(authToken)) {
+            am.setAuthToken(account, authTokenType, authToken);
             final Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
