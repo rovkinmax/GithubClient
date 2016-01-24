@@ -18,8 +18,9 @@ import com.github.rovkinmax.githubclient.widget.RepoListAdapter;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 
-public class MainActivity extends BaseAuthActivity implements LoaderManager.LoaderCallbacks<List<Repo>> {
+public class MainActivity extends BaseAuthActivity implements LoaderManager.LoaderCallbacks<List<Repo>>, RealmChangeListener {
 
     private Realm mRealm;
     private final RepoListAdapter mAdapter = new RepoListAdapter();
@@ -52,11 +53,11 @@ public class MainActivity extends BaseAuthActivity implements LoaderManager.Load
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
+        mAdapter.setRepoList(mRealm.allObjects(Repo.class));
     }
 
     private void loadRepoList() {
-        getLoaderManager().restartLoader(R.id.repo_list_loader, Bundle.EMPTY, this).forceLoad();
-        ;
+        getLoaderManager().restartLoader(R.id.repo_list_loader, Bundle.EMPTY, this);
     }
 
     private void showProgress(boolean refreshing) {
@@ -67,6 +68,7 @@ public class MainActivity extends BaseAuthActivity implements LoaderManager.Load
     @Override
     protected void onResume() {
         super.onResume();
+        mRealm.addChangeListener(this);
         setupPTR();
     }
 
@@ -82,6 +84,7 @@ public class MainActivity extends BaseAuthActivity implements LoaderManager.Load
     @Override
     protected void onPause() {
         super.onPause();
+        mRealm.removeChangeListener(this);
         mRefreshLayout.setOnRefreshListener(null);
     }
 
@@ -104,14 +107,16 @@ public class MainActivity extends BaseAuthActivity implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<List<Repo>> loader, List<Repo> data) {
-        if (data != null) {
-            mAdapter.setRepoList(data);
-            mAdapter.notifyDataSetChanged();
-        }
+        showProgress(false);
     }
 
     @Override
     public void onLoaderReset(Loader<List<Repo>> loader) {
 
+    }
+
+    @Override
+    public void onChange() {
+        mAdapter.notifyDataSetChanged();
     }
 }
