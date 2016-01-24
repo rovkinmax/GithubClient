@@ -1,21 +1,16 @@
 package com.github.rovkinmax.githubclient.api;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.github.rovkinmax.githubclient.app.App;
 import com.github.rovkinmax.githubclient.model.Repo;
 import com.github.rovkinmax.githubclient.util.AuthUtil;
-import com.github.rovkinmax.githubclient.util.RealmUtil;
 
 import java.util.List;
 
-import io.realm.Realm;
 import retrofit.RequestInterceptor;
 import retrofit.http.GET;
-import rx.Observable;
-import rx.functions.Func1;
 
 /**
  * @author Rovkin Max
@@ -44,28 +39,12 @@ public class MainApi {
         };
     }
 
-    public static Observable<List<Repo>> repoList(final Context context) {
-        return sRepoApi.repoList().flatMap(buildSaveRepoListFunc(context));
-    }
-
-    @NonNull
-    private static Func1<List<Repo>, Observable<List<Repo>>> buildSaveRepoListFunc(final Context context) {
-        return new Func1<List<Repo>, Observable<List<Repo>>>() {
-            @Override
-            public Observable<List<Repo>> call(final List<Repo> repos) {
-                RealmUtil.safeTransaction(context, new RealmUtil.TransactionListener() {
-                    @Override
-                    public void makeTransaction(Realm realm) {
-                        realm.copyToRealmOrUpdate(repos);
-                    }
-                });
-                return Observable.just(repos);
-            }
-        };
+    public static List<Repo> repoList() {
+        return sRepoApi.repoList();
     }
 
     private interface RepoApi {
         @GET("/user/repos")
-        Observable<List<Repo>> repoList();
+        List<Repo> repoList();
     }
 }
