@@ -18,12 +18,12 @@ import retrofit.converter.GsonConverter;
 /**
  * @author Rovkin Max
  */
-public final class Common {
+final class Common {
     private static final String LOG_TAG = "!GH_Client";
     private static final int TIMEOUT = 60;
     private static final int WRITE_TIMEOUT = 120;
     private static final int CONNECT_TIMEOUT = 10;
-    public static final Gson GSON_REALM = new GsonBuilder()
+    private static final Gson GSON_REALM = new GsonBuilder()
             .setExclusionStrategies(new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes f) {
@@ -48,7 +48,6 @@ public final class Common {
     }
 
     static RestAdapter.Builder getRestAdapter() {
-        // TODO: set log Level
         return new RestAdapter.Builder()
                 .setLog(new AndroidLog(LOG_TAG))
                 .setLogLevel(RestAdapter.LogLevel.FULL)
@@ -56,6 +55,4 @@ public final class Common {
                 .setClient(new OkClient(CLIENT))
                 .setEndpoint(BuildConfig.SERVER_URL);
     }
-
-
 }
