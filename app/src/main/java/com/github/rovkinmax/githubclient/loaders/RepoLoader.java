@@ -21,13 +21,18 @@ public class RepoLoader extends AsyncTaskLoader<List<Repo>> {
 
     @Override
     public List<Repo> loadInBackground() {
-        final List<Repo> repoList = MainApi.repoList();
-        RealmUtil.safeTransaction(getContext(), new RealmUtil.TransactionListener() {
-            @Override
-            public void makeTransaction(Realm realm) {
-                realm.copyToRealmOrUpdate(repoList);
-            }
-        });
-        return repoList;
+
+        try {
+            final List<Repo> repoList = MainApi.repoList();
+            RealmUtil.safeTransaction(getContext(), new RealmUtil.TransactionListener() {
+                @Override
+                public void makeTransaction(Realm realm) {
+                    realm.copyToRealmOrUpdate(repoList);
+                }
+            });
+            return repoList;
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 }

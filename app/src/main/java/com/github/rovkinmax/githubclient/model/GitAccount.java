@@ -11,9 +11,6 @@ import com.github.rovkinmax.githubclient.BuildConfig;
  */
 @SuppressLint("ParcelCreator")
 public class GitAccount extends Account {
-    public static final String REFRESH_TOKEN_KEY = "refresh_token_key";
-    public static final String TOKEN_TYPE_KEY = "token_type_key";
-
     public GitAccount(String name) {
         super(name, BuildConfig.ACCOUNT_TYPE);
     }
