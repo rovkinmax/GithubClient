@@ -12,7 +12,7 @@ public final class RealmUtil {
     private RealmUtil() {
     }
 
-    public static void safeTransaction(@NonNull Context context, @NonNull TransactionListener listener) {
+    public static void safeTransaction(@NonNull Context context, @NonNull Realm.Transaction listener) {
         Realm realm = Realm.getInstance(context);
         //noinspection TryFinallyCanBeTryWithResources
         try {
@@ -23,17 +23,10 @@ public final class RealmUtil {
     }
 
     public static void safeTransaction(@NonNull Realm realm,
-                                       @NonNull TransactionListener listener) {
+                                       @NonNull Realm.Transaction listener) {
         try {
-            realm.beginTransaction();
-            listener.makeTransaction(realm);
-            realm.commitTransaction();
-        } catch (Throwable e) {
-            realm.cancelTransaction();
+            realm.executeTransaction(listener);
+        } catch (Throwable ignored) {
         }
-    }
-
-    public interface TransactionListener {
-        void makeTransaction(Realm realm);
     }
 }

@@ -24,9 +24,9 @@ public class RepoLoader extends AsyncTaskLoader<List<Repo>> {
 
         try {
             final List<Repo> repoList = MainApi.repoList();
-            RealmUtil.safeTransaction(getContext(), new RealmUtil.TransactionListener() {
+            RealmUtil.safeTransaction(getContext(), new Realm.Transaction() {
                 @Override
-                public void makeTransaction(Realm realm) {
+                public void execute(Realm realm) {
                     realm.copyToRealmOrUpdate(repoList);
                 }
             });
