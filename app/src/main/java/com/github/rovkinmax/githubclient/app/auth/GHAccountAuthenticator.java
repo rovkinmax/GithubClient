@@ -14,8 +14,6 @@ import com.github.rovkinmax.githubclient.activity.LoginActivity;
 import com.github.rovkinmax.githubclient.api.AuthApi;
 import com.github.rovkinmax.githubclient.model.api.Authorization;
 
-import rx.functions.Action1;
-
 /**
  * @author Rovkin Max
  */
@@ -53,22 +51,13 @@ public class GHAccountAuthenticator extends AbstractAccountAuthenticator {
         if (TextUtils.isEmpty(authToken)) {
             final String password = am.getPassword(account);
             if (!TextUtils.isEmpty(password)) {
-                final Authorization[] tokenResponse = {null};
-                AuthApi.auth(mContext, account.name, password)
-                        .subscribe(new Action1<Authorization>() {
-                            @Override
-                            public void call(Authorization authorization) {
-                                tokenResponse[0] = authorization;
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
+                try {
+                    Authorization authorization = AuthApi.auth(account.name, password);
+                    if (authorization != null) {
+                        authToken = authorization.getToken();
+                    }
+                } catch (Exception e) {
 
-                            }
-                        });
-
-                if (tokenResponse[0] != null) {
-                    authToken = tokenResponse[0].getToken();
                 }
             }
         }

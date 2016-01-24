@@ -1,5 +1,7 @@
 package com.github.rovkinmax.githubclient.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,8 +35,13 @@ public class MainActivity extends BaseAuthActivity {
     private SwipeRefreshLayout mRefreshLayout;
     private RetainWrapper<List<Repo>> mRetainWrapper;
 
-    @Override
+    public static void start(Context context) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
+    }
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mRealm = Realm.getInstance(this);

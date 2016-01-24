@@ -2,9 +2,11 @@ package com.github.rovkinmax.githubclient.api;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
-import com.github.rovkinmax.githubclient.model.AuthData;
+import com.github.rovkinmax.githubclient.app.App;
 import com.github.rovkinmax.githubclient.model.Repo;
+import com.github.rovkinmax.githubclient.util.AuthUtil;
 import com.github.rovkinmax.githubclient.util.RealmUtil;
 
 import java.util.List;
@@ -33,9 +35,9 @@ public class MainApi {
         return new RequestInterceptor() {
             @Override
             public void intercept(RequestFacade request) {
-                AuthData authData = AuthData.getInstance();
-                if (authData != null) {
-                    String headerValue = String.format(AUTH_HEADER_VALUE_FORMAT, AUTH_TOKEN_TYPE, authData.getAuthToken());
+                String authToken = AuthUtil.getToken(App.getInstance());
+                if (!TextUtils.isEmpty(authToken)) {
+                    String headerValue = String.format(AUTH_HEADER_VALUE_FORMAT, AUTH_TOKEN_TYPE, authToken);
                     request.addHeader(AUTH_HEADER_KEY, headerValue);
                 }
             }

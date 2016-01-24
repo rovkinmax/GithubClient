@@ -39,7 +39,6 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
 
-    compile 'com.pixplicity.easyprefs:library:1.8.1@aar'
 
     compile 'io.realm:realm-android:0.87.1'
 

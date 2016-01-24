@@ -3,10 +3,8 @@ package com.github.rovkinmax.githubclient.activity;
 import android.accounts.Account;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 
 import com.github.rovkinmax.githubclient.util.AuthUtil;
-import com.github.rovkinmax.githubclient.util.PrefUtil;
 
 
 /**
@@ -30,6 +28,6 @@ public abstract class BaseAuthActivity extends AppCompatActivity {
         if (userAccount == null) {
             authNeeded = true;
         }
-        return authNeeded || TextUtils.isEmpty(PrefUtil.getUserName());
+        return authNeeded;
     }
 }
