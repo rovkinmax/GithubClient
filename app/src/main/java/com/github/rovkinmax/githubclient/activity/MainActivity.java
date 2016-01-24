@@ -57,7 +57,7 @@ public class MainActivity extends BaseAuthActivity implements LoaderManager.Load
     }
 
     private void loadRepoList() {
-        getLoaderManager().restartLoader(R.id.repo_list_loader, Bundle.EMPTY, this);
+        getLoaderManager().restartLoader(R.id.repo_list_loader, Bundle.EMPTY, this).forceLoad();
     }
 
     private void showProgress(boolean refreshing) {
